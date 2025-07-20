@@ -10,32 +10,28 @@ export default function App() {
 
 function TipCalculator() {
   const [bill, setBill] = useState('');
-  const [reviews, setReviews] = useState(['0', '0']);
+  const [percentage1, setPercentage1] = useState(0);
+  const [percentage2, setPercentage2] = useState(0);
 
-  function handleChangeReviewYou(e) {
-    setReviews(reviewsArray => [e.target.value, reviewsArray[1]]);
-  }
-
-  function handleChangeReviewFriend(e) {
-    setReviews(reviewsArray => [reviewsArray[0], e.target.value]);
-  }
+  const tip = Math.round(+bill * ((percentage1 + percentage2) / 2 / 100));
 
   function handleReset() {
-    setBill(0);
-    setReviews(['bad', 'bad']);
+    setBill('');
+    setPercentage1(0);
+    setPercentage2(0);
   }
 
   return (
     <div>
-      <BillInput onSetBill={setBill} bill={bill} />
-      <SelectPercentage review={reviews[0]} onChangeReview={handleChangeReviewYou}>
+      <BillInput onSetBill={setBill} bill={bill} tip={tip} />
+      <SelectPercentage percentage={percentage1} onSetPercentage={setPercentage1}>
         How did you like the service?
       </SelectPercentage>
-      <SelectPercentage review={reviews[1]} onChangeReview={handleChangeReviewFriend}>
+      <SelectPercentage percentage={percentage2} onSetPercentage={setPercentage2}>
         How did your friend like the service?
       </SelectPercentage>
-      {bill > 0 && <Output bill={+bill} reviews={reviews} />}
-      {bill > 0 && <Reset onReset={handleReset} />}
+      {bill && <Output bill={+bill} tip={tip} />}
+      {bill && <Reset onReset={handleReset} />}
     </div>
   );
 }
@@ -49,11 +45,11 @@ function BillInput({ bill, onSetBill }) {
   );
 }
 
-function SelectPercentage({ review, onChangeReview, children }) {
+function SelectPercentage({ percentage, onSetPercentage, children }) {
   return (
     <div>
       <label>{children}</label>
-      <select value={review} onChange={onChangeReview}>
+      <select value={percentage} onChange={e => onSetPercentage(+e.target.value)}>
         <option value="0">Dissatisfied (0)%</option>
         <option value="5">It was okay (5)%</option>
         <option value="10">It was good (10)%</option>
@@ -63,20 +59,12 @@ function SelectPercentage({ review, onChangeReview, children }) {
   );
 }
 
-function Output({ bill, reviews }) {
-  const billNum = +bill;
-  const reviewYou = +reviews[0];
-  const reviewFriend = +reviews[1];
-
-  console.log(reviewYou, reviewFriend);
-
-  const tipPercent = (reviewYou + reviewFriend) / 2 / 100;
-  const tip = Math.round(billNum * tipPercent);
-  const total = billNum + tip;
+function Output({ bill, tip }) {
+  const total = bill + tip;
 
   return (
     <h3>
-      You pay ${total} (${billNum} + ${tip} tip)
+      You pay ${total} (${bill} + ${tip} tip)
     </h3>
   );
 }
